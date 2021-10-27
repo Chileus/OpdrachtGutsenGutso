@@ -1,20 +1,27 @@
 <template>
   <form>
-    <h2> Log in </h2>
-    <div class="form-group">
-      <input @blur="handleEmail" v-model="usernameLogin" type="email" class="form-control" placeholder="Email" required>
-      <img v-if="correctEmail" class="eye-icon" :src='checksolid' alt='eye' @click='showPassword'>
+    <h2>Log in</h2>
+    <div class="input-container">
+      <div class="form-group">
+        <input ref='email' @blur="handleEmail" v-model="usernameLogin" type="email" class="form-control" placeholder="E-mail address" required>
+        <img v-if="correctEmail == true" class="eye-icon" :src='checksolid' alt='eye' @click='showPassword'>
+      </div>
       <p class='error' v-if="emptyUsername"> May not be empty </p>
+      <p class='error' v-if="!correctEmail"> Must be a valid e-mail adress</p>
     </div>
-    <div class="form-group">
-      <input @blur="handlePassword" v-model="passwordLogin" @focus="passwordFocus = true" :type="password" class="form-control" placeholder="Password" required>
-      <img class="eye-icon" :src='image' alt='eye' @click='showPassword'>
+    <div class="input-container">
+      <div class="form-group">
+        <input @blur="passwordHandler" v-model="passwordLogin" @focus="passwordFocus = true" :type="password" class="form-control" placeholder="Password" required>
+        <img class="eye-icon" :src='image' alt='eye' @click='showPassword'>
+      </div>
       <p class='error' v-if="emptyPassword"> May not be empty </p>
+      <p class='error' v-if="invalidPassword">Needs a minumum of 8 characters</p>
     </div>
-    <button type="submit" @click="doLogin($event)">Log in</button>
+    <button type="submit" class="button" @click="doLogin($event)">Log in</button>
     <p v-if="wrongLogin" class="loginError"> The combination of this e-mail address and password is invalid. </p>
+    <router-link to="/Register"><div class="button registerButton">Make an account</div></router-link>
   </form>
-  <router-link to="/Register" class="button"><div class="registerButton">Register</div></router-link>
+
 </template>
 
 <script>
@@ -29,7 +36,8 @@ export default {
       passwordFocus: false,
       emptyUsername: false,
       emptyPassword: false,
-      correctEmail: false,
+      invalidPassword: false,
+      correctEmail: Boolean,
       wrongLogin: false,
       image: eyesolid,
       password: 'password',
@@ -47,15 +55,18 @@ export default {
     doLogin(event){
       event.preventDefault();
       if(this.usernameLogin && this.passwordLogin){
-        const article = { email: "eve.aolt@reqres.in", password: "citysl" };
+        //"eve.holt@reqres.in"
+        //"cityslicka"
+        const article = { email: this.usernameLogin, password: this.passwordLogin};
         this.axios.post("https://reqres.in/api/login", article)
-          .then(response => console.log(response.status))
-          .catch(this.wrongLogin = true)
+          .then(() => window.location.href = "https://www.gutsgusto.com/en")
+          .catch(() => this.wrongLogin = true)
       }
       if(!this.usernameLogin){
         this.emptyUsername = true;
+        this.focusInputEmail();
       }
-      if(!this.passwordLogin){
+      else if(!this.passwordLogin){
         this.emptyPassword = true;
       }
     },
@@ -67,18 +78,37 @@ export default {
         this.password = 'password'
         this.image = eyesolid;
       }
+    },
 
-    },
     passwordHandler(){
-      console.log('passwordchanged')
-    },
-    handleEmail(){
-      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if(re.test(this.usernameLogin)){
-        this.correctEmail = true;
+      this.firstTry = true;
+      if(this.passwordLogin.length == 0){
+        this.emptyPassword = true;
       }else{
-        this.correctEmail = false;
+        this.emptyPassword = false;
       }
+      if(this.passwordLogin.length < 8 && this.passwordLogin.length !=0){
+        this.invalidPassword = true;
+      }else{
+        this.invalidPassword = false;
+      }
+    },
+
+    handleEmail(){
+      if(this.usernameLogin == ''){
+        this.emptyUsername = true;
+      }else{
+        this.emptyUsername = false;
+        var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if(re.test(this.usernameLogin)){
+          this.correctEmail = true;
+        }else{
+          this.correctEmail = false;
+        }
+      }
+    },
+    focusInputEmail() {
+      this.$refs.email.focus();
     }
   }
 };
@@ -93,29 +123,33 @@ a{
   text-decoration: none;
 
   .registerButton{
-    margin: 10px;
     text-align: center;
     width: 100%;
     padding: 12px 0px;
-    background-color: lightgrey;
+    background-color: #f0f0f0;
     border-radius: 30px;
     color:black;
   }
-    .registerButton:hover{
-      background-color: grey;
-    }
-
 }
+
 a:visited{
   color:black;
 }
 
-
+.button{
+  margin: 10px 0;
+}
 
 form{
-  width:500px;
+  max-width:500px;
   margin: 0 auto;
-
+  padding: 48px 16px;
+  h2{
+    margin-bottom: 10px;
+  }
+  img{
+    bottom: 15px;
+  }
   .loginError{
     padding: 20px;
     background-color: lightgrey;
@@ -127,49 +161,12 @@ form{
     font-size: 14px;
     margin: 5px;
   }
-
-  h2{
-    font-family: 'Oswald', sans-serif;
-    font-size: 48px;
-    text-align: left;
-    text-transform: uppercase;
-  }
-  input{
-    padding: 14px 0px;
-    padding-left: 26px;
-    border: 1px solid #ddd;
-    color: #111;
-    font-size: 16px;
-    width: 100%
-  }
-  input:hover, input:focus, input:target{
-    border: 1px solid #000;
-  }
-
-  button{
-    font-size: 16px;
-    padding: 12px 24px;
-    border: 0px;
-    border-radius: 30px;
-    width: 100%;
-    background-color: black;
-    color: white;
-    transition: 0.2s;
-  }
-  button:hover{
-    background-color: grey;
-  }
   .form-group{
     position: relative;
     width: 100%;
-    padding-bottom: 30px;
   }
-  img{
-    bottom: 45px;
-    right:0px;
-    width:20px;
-    position: absolute;
-    filter: opacity(50%);
+  .input-container{
+    padding: 10px 0;
   }
 }
 </style>
