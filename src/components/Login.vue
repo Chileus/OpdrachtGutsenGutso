@@ -45,7 +45,8 @@ export default {
       checksolid,
       usernameLogin: '',
       passwordLogin: '',
-      articleId: String
+      articleId: String,
+      re: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
     }
   },
   props: {
@@ -54,7 +55,7 @@ export default {
   methods: {
     doLogin(event){
       event.preventDefault();
-      if(this.usernameLogin && this.passwordLogin){
+      if(this.usernameLogin && this.passwordLogin && this.passwordLogin.length > 8 && this.re.test(this.usernameLogin)){
         //"eve.holt@reqres.in"
         //"cityslicka"
         const article = { email: this.usernameLogin, password: this.passwordLogin};
@@ -99,8 +100,7 @@ export default {
         this.emptyUsername = true;
       }else{
         this.emptyUsername = false;
-        var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        if(re.test(this.usernameLogin)){
+        if(this.re.test(this.usernameLogin)){
           this.correctEmail = true;
         }else{
           this.correctEmail = false;

@@ -28,7 +28,7 @@
       <p class='error' v-if="passwordNotIdentical">Passwords are not the same</p>
     </div>
     <button type="submit" class="button" @click="doRegister($event)">Register</button>
-    <p v-if="errorMessage" class="loginError"> The combination of this e-mail address and password is invalid. </p>
+    <p v-if="errorMessage" class="loginError"> {{errorMessage}} </p>
   </form>
   <div class="login">
     <router-link class="loginlink" to="/"><div>Already have an account?</div></router-link>
@@ -131,7 +131,6 @@ export default {
   },
   watch: {
     passwordRegister: function (value) {
-      console.log(this.firstTryPass)
       if(this.firstTryPass){
         if(value.length < 8 && value.length != 0){
             this.invalidPassword = true;
